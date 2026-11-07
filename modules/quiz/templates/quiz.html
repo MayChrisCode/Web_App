@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="quiz-card">
+    <div class="garden-header">
+        <div class="flower-stage" id="flower-display">🌰</div>
+        <div class="streak-info">
+            <span id="stage-label">Samen (0/4)</span>
+            <small id="garden-stats">Garten lädt...</small>
+        </div>
+    </div>
+
+    <h2 id="question-text">Lade Frage...</h2>
+    <div id="options-container" class="options-grid"></div>
+
+    <div id="feedback-box" class="feedback hidden"></div>
+    <button id="next-btn" class="next-btn hidden" onclick="loadNextQuestion()">Nächste Frage ➔</button>
+</div>
+
+<script>
+    const stages = [
+        { icon: "🌰", name: "Samen (0/4)" },
+        { icon: "🌱", name: "Keimling (1/4)" },
+        { icon: "🌿", name: "Knospe (2/4)" },
+        { icon: "🌷", name: "Kleine Blüte (3/4)" },
+        { icon: "🌻", name: "Volle Blume! (4/4)" }
+    ];
+
+    let currentQuestionId = null;
+
+    function updateFlowerUI(streak) {
+        const stage = stages[streak] || stages[0];
+        const flowerEl = document.getElementById('flower-display');
+        flowerEl.textContent = stage.icon;
+        flowerEl.classList.remove('grow-anim');
+        void flowerEl.offsetWidth; // Animation neu triggern
+        flowerEl.classList.add('grow-anim');
+        document.getElementById('stage-label').textContent = stage.name;
+    }
+
+    async function loadNextQuestion() {
+        document.getElementById('feedback-box').className = 'feedback hidden';
+        document.getElementById('next-btn').classList.add('hidden');
+
+        const res = await fetch('/quiz/api/next');
+        const data = await res.json();
+
+        currentQuestionId = data.id;
+        document.getElementById('question-text').textContent = data.question;
+        document.getElementById('garden-stats').textContent = 
+            `Gemeisterte Blumen im Garten: ${data.stats.mastered} von ${data.stats.total}`;
+        
+        updateFlowerUI(data.streak);
+
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        data.options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.textContent = opt;
+            btn.onclick = () => submitAnswer(opt, btn);
+            container.appendChild(btn);
+        });
+    }
+
+    async function submitAnswer(selected, clickedBtn) {
+        // Alle Buttons deaktivieren, damit man nicht doppelt klickt
+        const allBtns = document.querySelectorAll('.option-btn');
+        allBtns.forEach(b => b.disabled = true);
+
+        const res = await fetch('/quiz/api/answer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: currentQuestionId, selected: selected })
+        });
+        const result = await res.json();
+
+        const feedback = document.getElementById('feedback-box');
+        feedback.classList.remove('hidden');
+
+        if (result.correct) {
+            clickedBtn.classList.add('correct');
+            feedback.textContent = "Richtig! Deine Pflanze wächst.";
+            feedback.className = "feedback success";
+        } else {
+            clickedBtn.classList.add('wrong');
+            feedback.textContent = `Leider falsch. Richtig wäre: ${result.correct_answer}`;
+            feedback.className = "feedback error";
+        }
+
+        updateFlowerUI(result.new_streak);
+        document.getElementById('next-btn').classList.remove('hidden');
+    }
+
+    // Erste Frage beim Seitenstart laden
+    loadNextQuestion();
+</script>
+{% endblock %}

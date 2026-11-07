@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "question": "Welcher Planet unseres Sonnensystems ist der Sonne am nächsten?",
+    "options": [
+      "Venus",
+      "Merkur",
+      "Mars",
+      "Erde"
+    ],
+    "answer": "Merkur",
+    "streak": 4
+  },
+  {
+    "id": 2,
+    "question": "Welches chemische Element hat das Symbol 'Au'?",
+    "options": [
+      "Silber",
+      "Aluminium",
+      "Gold",
+      "Argon"
+    ],
+    "answer": "Gold",
+    "streak": 4
+  },
+  {
+    "id": 3,
+    "question": "Auf welchem Port läuft standardmäßig unverschlüsseltes HTTP?",
+    "options": [
+      "22",
+      "80",
+      "443",
+      "8080"
+    ],
+    "answer": "80",
+    "streak": 4
+  },
+  {
+    "id": 4,
+    "question": "Wie viele Knochen hat ein erwachsener menschlicher Körper ungefähr?",
+    "options": [
+      "106",
+      "206",
+      "306",
+      "406"
+    ],
+    "answer": "206",
+    "streak": 4
+  }
+]
